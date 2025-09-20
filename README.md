@@ -14,17 +14,12 @@ n8n polls ServiceNow twice per day for new tickets.
 
 - Output includes:
 
--- is_workspace_request
-
--- resources_requested (e.g., ["workspace","ec2","rds"])
-
--- action_type:
-
--- "workspace_only"
-
--- "workspace_and_others"
-
--- "non_workspace"
+  - is_workspace_request
+  -  resources_requested (e.g., ["workspace","ec2","rds"])
+  -  action_type:
+  -  "workspace_only"
+  -  "workspace_and_others"
+  -  "non_workspace"
 
 
 #### 3. Handling Based on Classification
