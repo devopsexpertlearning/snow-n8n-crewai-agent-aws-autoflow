@@ -24,28 +24,28 @@ n8n polls ServiceNow twice per day for new tickets.
 
 #### 3. Handling Based on Classification
 
-##### Case A: Workspace Only
+- ##### Case A: Workspace Only
 
-n8n starts approval workflow (explained in Step 4).
+  - n8n starts approval workflow (explained in Step 4).
 
-##### Case B: Workspace + Other Resources
+- ##### Case B: Workspace + Other Resources
 
-n8n handles in two parts:
+  - n8n handles in two parts:
 
-1. Workspace request → goes through approval workflow.
+    1. Workspace request → goes through approval workflow.
 
-2. Other resources (EC2, RDS, etc.) →
+    2. Other resources (EC2, RDS, etc.) →
 
-Send mail to requester:
-“Your WorkSpace request is being processed. For EC2/RDS, please raise separate tickets.”
+    3. Send mail to requester: “Your WorkSpace request is being processed. For EC2/RDS, please raise separate tickets.”
 
-##### Case C: Non-Workspace
+- ##### Case C: Non-Workspace
 
-n8n sends notification to a configured team member.
+  - n8n sends notification to a configured team member.
 
-Assigns ticket in ServiceNow for manual handling.
-
-No email goes to requester.
+  - Assigns ticket in ServiceNow for manual handling.
+    
+  - No email goes to requester.
+  
 
 
 #### 4. Approval Workflow for WorkSpace Requests
