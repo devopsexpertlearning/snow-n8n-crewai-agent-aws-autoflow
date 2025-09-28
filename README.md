@@ -66,7 +66,7 @@ The workflow is split into **6 modules** for easier maintenance and testing:
 6. **Module 6 – Notifications**  
    Sends emails to requester, approver, and escalation manager.
 
-7. **Integration
+7. **Integration**
 
 <img width="1908" height="934" alt="17590609318642868590474317741224" src="https://github.com/user-attachments/assets/b763cff7-8ea9-44ae-9499-483f435ef871" />
 
