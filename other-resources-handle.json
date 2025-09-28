@@ -1,5 +1,5 @@
 {
-  "name": "AWS Multi-Resource Automation - Production",
+  "name": "AWS Multi-Resource Automation - Production with Retry",
   "nodes": [
     {
       "parameters": {
@@ -99,7 +99,9 @@
             "BundleId": "wsb-xxxxxxxx",
             "WorkspaceProperties": {"RunningMode":"AUTO_STOP","RunningModeAutoStopTimeoutInMinutes":60,"RootVolumeSizeGib":80,"UserVolumeSizeGib":50,"ComputeTypeName":"STANDARD"}
           }
-        ]
+        ],
+        "retryOnFail": true,
+        "retryStrategy": {"type":"exponentialBackoff","maxRetries":5,"initialInterval":10000,"multiplier":2}
       },
       "id": "provision_workspace",
       "name": "Provision AWS WorkSpace",
@@ -127,7 +129,9 @@
         "instanceType": "t3.medium",
         "imageId": "ami-xxxxxxxx",
         "minCount": 1,
-        "maxCount": 1
+        "maxCount": 1,
+        "retryOnFail": true,
+        "retryStrategy": {"type":"exponentialBackoff","maxRetries":5,"initialInterval":10000,"multiplier":2}
       },
       "id": "provision_ec2",
       "name": "Provision EC2",
@@ -157,7 +161,9 @@
         "engine": "mysql",
         "allocatedStorage": 20,
         "masterUsername": "admin",
-        "masterUserPassword": "={{$credentials.AWS_RDS.password}}"
+        "masterUserPassword": "={{$credentials.AWS_RDS.password}}",
+        "retryOnFail": true,
+        "retryStrategy": {"type":"exponentialBackoff","maxRetries":5,"initialInterval":10000,"multiplier":2}
       },
       "id": "provision_rds",
       "name": "Provision RDS",
@@ -182,7 +188,9 @@
         "service": "s3",
         "operation": "createBucket",
         "region": "={{$credentials.AWS_WorkSpaces.region}}",
-        "bucketName": "={{'s3-'+$json[\"sys_id\"]}}"
+        "bucketName": "={{'s3-'+$json[\"sys_id\"]}}",
+        "retryOnFail": true,
+        "retryStrategy": {"type":"exponentialBackoff","maxRetries":5,"initialInterval":10000,"multiplier":2}
       },
       "id": "provision_s3",
       "name": "Provision S3 Bucket",
@@ -196,8 +204,8 @@
         "authentication": "smtp",
         "fromEmail": "={{$credentials.SMTP.user}}",
         "toEmail": "={{$json[\"requester_email\"]}}",
-        "subject": "Resource Provisioned",
-        "text": "Hello {{$json[\"requester\"]}},\n\nYour requested resource {{$json[\"resource_type\"]}} has been provisioned successfully."
+        "subject": "Resource Provisioned Successfully",
+        "text": "Hello {{$json[\"requester\"]}},\n\nYour requested resource {{$json[\"resource_type\"]}} has been provisioned successfully.\nDetails:\n{{$json | json}}"
       },
       "id": "notify_requester_resource_ready",
       "name": "Notify Requester Resource Ready",
@@ -237,7 +245,7 @@
         "fromEmail": "={{$credentials.SMTP.user}}",
         "toEmail": "ops-team@example.com",
         "subject": "Workflow Error Notification",
-        "text": "An error occurred in the AWS Multi-Resource Automation workflow. Check n8n execution logs."
+        "text": "An error occurred in the AWS Multi-Resource Automation workflow. Check n8n execution logs.\n{{$json | json}}"
       },
       "id": "notify_ops_error",
       "name": "Notify Ops Team on Error",
