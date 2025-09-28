@@ -68,8 +68,7 @@ The workflow is split into **6 modules** for easier maintenance and testing:
 
 7. **Integration
 
-
-<img width="1898" height="1077" alt="17590607955388399678372880030469" src="https://github.com/user-attachments/assets/250a2895-c37d-45bd-8a5f-75f35b19eef7" />
+<img width="1908" height="934" alt="17590609318642868590474317741224" src="https://github.com/user-attachments/assets/b763cff7-8ea9-44ae-9499-483f435ef871" />
 
 ---
 
