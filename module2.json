@@ -1,0 +1,37 @@
+{
+  "name": "Module 2 - CrewAI Classification",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "url": "={{$credentials.CrewAI_API.endpoint}}",
+        "method": "POST",
+        "responseFormat": "json",
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "ticket_description",
+              "value": "={{$json[\"short_description\"]}}"
+            },
+            {
+              "name": "ticket_metadata",
+              "value": "={{JSON.stringify($json)}}"
+            }
+          ]
+        }
+      },
+      "id": "3",
+      "name": "CrewAI - Classify Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [800, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "={{$credentials.CrewAI_API.id}}",
+          "name": "CrewAI API"
+        }
+      }
+    }
+  ],
+  "connections": {}
+}
