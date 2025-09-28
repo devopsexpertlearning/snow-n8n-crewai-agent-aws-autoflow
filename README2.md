@@ -1,6 +1,6 @@
 # AWS WorkSpaces Request Automation
 
-This repository contains the **n8n workflows** for automating AWS WorkSpaces requests using **ServiceNow**, **CrewAI**, and **AWS WorkSpaces API**, including approval workflow, reminders, escalations, and notifications.  
+This repository contains the **n8n workflows** for automating AWS WorkSpaces/EC2/Other resources requests using **ServiceNow**, **CrewAI**, and **AWS WorkSpaces API**, including approval workflow, reminders, escalations, and notifications.  
 
 ---
 
