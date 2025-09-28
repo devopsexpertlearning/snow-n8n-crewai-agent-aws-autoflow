@@ -66,6 +66,15 @@ The workflow is split into **6 modules** for easier maintenance and testing:
 6. **Module 6 – Notifications**  
    Sends emails to requester, approver, and escalation manager.
 
+7. **Integration
+
+Module 1 (ServiceNow Poll) → Module 2 (CrewAI Classification)
+       ↓
+Module 3 (Routing Logic) → Module 4 (Approval Workflow)
+       ↓
+Module 5 (Provision Workspace) → Module 6 (Notifications)
+
+
 ---
 
 ## Architecture
