@@ -1,0 +1,223 @@
+{
+  "name": "AWS WorkSpaces Automation - Production",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {"mode": "everyDay","hour": [9, 21],"minute": 0}
+          ]
+        }
+      },
+      "id": "cron_ticket_polling",
+      "name": "Cron - Poll ServiceNow Tickets",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "table": "incident",
+        "options": {"query": "active=true^ORDERBYDESCsys_created_on","limit": 50}
+      },
+      "id": "servicenow_get_tickets",
+      "name": "ServiceNow - Get Tickets",
+      "type": "n8n-nodes-base.servicenow",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "credentials": {"serviceNowApi":{"id":"={{$credentials.serviceNowApi.id}}","name":"ServiceNow Dev"}}
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "url": "={{$credentials.CrewAI_API.url}}",
+        "method": "POST",
+        "responseFormat": "json",
+        "bodyParametersUi": {
+          "parameter": [
+            {"name": "ticket_description","value": "={{$json[\"short_description\"]}}"},
+            {"name": "ticket_metadata","value": "={{JSON.stringify($json)}}"}
+          ]
+        }
+      },
+      "id": "crewai_classify_ticket",
+      "name": "CrewAI - Classify Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [800, 300],
+      "credentials": {"httpHeaderAuth":{"id":"={{$credentials.CrewAI_API.id}}","name":"CrewAI API"}}
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "rules": [
+          {"value": "workspace_only","expression": "={{$json[\"action_type\"] === 'workspace_only'}}","output":0},
+          {"value": "workspace_and_others","expression": "={{$json[\"action_type\"] === 'workspace_and_others'}}","output":1},
+          {"value": "non_workspace","expression": "={{$json[\"action_type\"] === 'non_workspace'}}","output":2}
+        ]
+      },
+      "id": "switch_routing_logic",
+      "name": "Switch - Route by Action Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {},
+      "id": "approval_workflow_trigger",
+      "name": "Trigger Approval Workflow",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1300, 100]
+    },
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"requester_email\"]}}",
+        "subject": "WorkSpace Request in Progress",
+        "text": "Your WorkSpace request is being processed. For EC2/RDS, please raise separate tickets."
+      },
+      "id": "notify_requester_other_resources",
+      "name": "Notify Requester Other Resources",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1600, 200],
+      "credentials": {"smtp":{"id":"={{$credentials.SMTP.id}}","name":"SMTP AWS SES"}}
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "table": "incident",
+        "options": {"limit": 1}
+      },
+      "id": "assign_non_workspace",
+      "name": "ServiceNow - Assign Non-Workspace Ticket",
+      "type": "n8n-nodes-base.servicenow",
+      "typeVersion": 1,
+      "position": [1300, 500],
+      "credentials": {"serviceNowApi":{"id":"={{$credentials.serviceNowApi.id}}","name":"ServiceNow Dev"}}
+    },
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"requester_email\"]}}",
+        "subject": "WorkSpace Request Auto-Closed",
+        "text": "Ticket {{$json[\"number\"]}} has been auto-closed after 3 reminders + 2 escalations without approval."
+      },
+      "id": "notify_requester_autoclose",
+      "name": "Notify Requester Auto-Close",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [3000, 300],
+      "credentials": {"smtp":{"id":"={{$credentials.SMTP.id}}","name":"SMTP AWS SES"}}
+    },
+    {
+      "parameters": {
+        "service": "workspaces",
+        "operation": "createWorkspaces",
+        "region": "={{$credentials.AWS_WorkSpaces.region}}",
+        "workspaces": [
+          {
+            "DirectoryId": "d-1234567890",
+            "UserName": "={{$json[\"requester\"]}}",
+            "BundleId": "wsb-xxxxxxxx",
+            "WorkspaceProperties": {"RunningMode":"AUTO_STOP","RunningModeAutoStopTimeoutInMinutes":60,"RootVolumeSizeGib":80,"UserVolumeSizeGib":50,"ComputeTypeName":"STANDARD"}
+          }
+        ]
+      },
+      "id": "provision_workspace",
+      "name": "Provision AWS WorkSpace",
+      "type": "n8n-nodes-aws.workspaces",
+      "typeVersion": 1,
+      "position": [1800, 100],
+      "credentials": {"aws":{"id":"={{$credentials.AWS_WorkSpaces.id}}","name":"AWS WorkSpaces"}}
+    },
+    {
+      "parameters": {
+        "mode": "wait",
+        "waitTime": 120
+      },
+      "id": "wait_for_workspace_ready",
+      "name": "Wait for Workspace Ready",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1900, 100]
+    },
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"requester_email\"]}}",
+        "subject": "Your AWS WorkSpace is Ready",
+        "text": "Hello {{$json[\"requester\"]}},\n\nYour AWS WorkSpace has been provisioned successfully.\nUsername: {{$json[\"requester\"]}}\nDirectory: d-1234567890"
+      },
+      "id": "notify_requester_workspace_ready",
+      "name": "Notify Requester Workspace Ready",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [2000, 100],
+      "credentials": {"smtp":{"id":"={{$credentials.SMTP.id}}","name":"SMTP AWS SES"}}
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "incident",
+        "updateFields": {
+          "state": "Closed",
+          "comments": "AWS WorkSpace provisioned successfully and requester notified."
+        },
+        "query": "sys_id={{$json[\"sys_id\"]}}"
+      },
+      "id": "update_servicenow_ticket",
+      "name": "Update ServiceNow Ticket",
+      "type": "n8n-nodes-base.servicenow",
+      "typeVersion": 1,
+      "position": [2200, 100],
+      "credentials": {"serviceNowApi":{"id":"={{$credentials.serviceNowApi.id}}","name":"ServiceNow Dev"}}
+    },
+    {
+      "parameters": {},
+      "id": "error_trigger",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [2400, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "ops-team@example.com",
+        "subject": "Workflow Error Notification",
+        "text": "An error occurred in the AWS WorkSpaces Automation workflow. Check n8n execution logs."
+      },
+      "id": "notify_ops_error",
+      "name": "Notify Ops Team on Error",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [2600, 300],
+      "credentials": {"smtp":{"id":"={{$credentials.SMTP.id}}","name":"SMTP AWS SES"}}
+    }
+  ],
+  "connections": {
+    "Cron - Poll ServiceNow Tickets": {"main":[[{"node":"servicenow_get_tickets","type":"main","index":0}]]},
+    "servicenow_get_tickets": {"main":[[{"node":"crewai_classify_ticket","type":"main","index":0}]]},
+    "crewai_classify_ticket": {"main":[[{"node":"switch_routing_logic","type":"main","index":0}]]},
+    "switch_routing_logic": {
+      "main":[
+        [{"node":"approval_workflow_trigger","type":"main","index":0}],
+        [{"node":"notify_requester_other_resources","type":"main","index":0}],
+        [{"node":"assign_non_workspace","type":"main","index":0}]
+      ]
+    },
+    "approval_workflow_trigger":{"main":[[{"node":"provision_workspace","type":"main","index":0}]]},
+    "provision_workspace":{"main":[[{"node":"wait_for_workspace_ready","type":"main","index":0}]]},
+    "wait_for_workspace_ready":{"main":[[{"node":"notify_requester_workspace_ready","type":"main","index":0}]]},
+    "notify_requester_workspace_ready":{"main":[[{"node":"update_servicenow_ticket","type":"main","index":0}]]},
+    "assign_non_workspace":{"main":[[{"node":"notify_requester_other_resources","type":"main","index":0}]]},
+    "error_trigger":{"main":[[{"node":"notify_ops_error","type":"main","index":0}]]}
+  }
+}
