@@ -1,0 +1,65 @@
+{
+  "agent_name": "AWS Ticket Reasoning Agent",
+  "description": "This agent classifies incoming ServiceNow tickets, determines required AWS resources, and provides reasoning for its decisions.",
+  "input_schema": {
+    "short_description": "string",
+    "description": "string",
+    "requester_department": "string",
+    "priority": "string",
+    "previous_outcome": "string"
+  },
+  "output_schema": {
+    "action_type": "string",
+    "resource_type": "string",
+    "reasoning": "string",
+    "notes": "string"
+  },
+  "instructions": "You are an expert IT automation assistant. For each incoming ticket, analyze the short description, description, priority, department, and previous outcomes. Determine: \n1. The action_type: 'workspace_only', 'workspace_and_others', or 'non_workspace'.\n2. If action_type is 'workspace_and_others', identify the AWS resource needed: 'EC2', 'RDS', 'S3', or 'Other'.\n3. Provide reasoning for your decision in natural language.\n4. Provide notes on any provisioning instructions or important context.\nReturn output strictly in JSON format using the output_schema.",
+  "examples": [
+    {
+      "input": {
+        "short_description": "Request new WorkSpace for Alice",
+        "description": "Alice requires a development WorkSpace with standard bundle",
+        "requester_department": "DevOps",
+        "priority": "High",
+        "previous_outcome": "Workspace provisioned within SLA"
+      },
+      "output": {
+        "action_type": "workspace_only",
+        "resource_type": "WorkSpace",
+        "reasoning": "Ticket specifically requests a WorkSpace, no other AWS resources are mentioned.",
+        "notes": "Provision standard WorkSpace bundle for Alice."
+      }
+    },
+    {
+      "input": {
+        "short_description": "Request EC2 instance for database testing",
+        "description": "Bob from QA needs a t3.medium instance in us-east-1 for MySQL testing",
+        "requester_department": "QA",
+        "priority": "Medium",
+        "previous_outcome": "EC2 provisioned successfully"
+      },
+      "output": {
+        "action_type": "workspace_and_others",
+        "resource_type": "EC2",
+        "reasoning": "Ticket requests EC2 instance specifically, so action_type is workspace_and_others with EC2 resource.",
+        "notes": "Provision EC2 t3.medium instance in us-east-1, assign default security group."
+      }
+    },
+    {
+      "input": {
+        "short_description": "Request new S3 bucket for project logs",
+        "description": "Need a bucket to store QA logs for Project X",
+        "requester_department": "QA",
+        "priority": "Low",
+        "previous_outcome": "S3 bucket created previously"
+      },
+      "output": {
+        "action_type": "workspace_and_others",
+        "resource_type": "S3",
+        "reasoning": "Ticket requires storage; S3 is the appropriate AWS service.",
+        "notes": "Create bucket named s3-<sys_id>, enable versioning."
+      }
+    }
+  ]
+}
