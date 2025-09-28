@@ -1,0 +1,142 @@
+{
+  "name": "Module 3 - Routing Logic",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "expression",
+        "rules": [
+          {
+            "value": "workspace_only",
+            "expression": "={{$json[\"action_type\"] === 'workspace_only'}}",
+            "output": 0
+          },
+          {
+            "value": "workspace_and_others",
+            "expression": "={{$json[\"action_type\"] === 'workspace_and_others'}}",
+            "output": 1
+          },
+          {
+            "value": "non_workspace",
+            "expression": "={{$json[\"action_type\"] === 'non_workspace'}}",
+            "output": 2
+          }
+        ]
+      },
+      "id": "4",
+      "name": "Switch - Route by Action Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+
+    {
+      "parameters": {
+        "operation": "getAll",
+        "table": "incident",
+        "options": {
+          "limit": 1
+        }
+      },
+      "id": "5",
+      "name": "ServiceNow - Assign Non-Workspace Ticket",
+      "type": "n8n-nodes-base.servicenow",
+      "typeVersion": 1,
+      "position": [1300, 500],
+      "credentials": {
+        "serviceNowApi": {
+          "id": "={{$credentials.serviceNowApi.id}}",
+          "name": "ServiceNow Dev"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"requester_email\"]}}",
+        "subject": "Your ticket requires manual handling",
+        "text": "Ticket {{$json[\"number\"]}} is classified as non-workspace. Assigned to team for manual processing."
+      },
+      "id": "6",
+      "name": "Notify Team Member",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1600, 500],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {},
+      "id": "7",
+      "name": "Trigger Approval Workflow",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1300, 100]
+    },
+
+    {
+      "parameters": {},
+      "id": "8",
+      "name": "Notify Requester for Other Resources",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1600, 200],
+      "parameters": {
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"requester_email\"]}}",
+        "subject": "WorkSpace Request in Progress",
+        "text": "Your WorkSpace request is being processed. For EC2/RDS, please raise separate tickets."
+      },
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Switch - Route by Action Type": {
+      "main": [
+        [
+          {
+            "node": "Trigger Approval Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Requester for Other Resources",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ServiceNow - Assign Non-Workspace Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ServiceNow - Assign Non-Workspace Ticket": {
+      "main": [
+        [
+          {
+            "node": "Notify Team Member",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
