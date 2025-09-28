@@ -1,0 +1,49 @@
+{
+  "name": "Module 1 - ServiceNow Ticket Polling",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyDay",
+              "hour": [9, 21],
+              "minute": 0
+            }
+          ]
+        }
+      },
+      "id": "1",
+      "name": "Cron (Twice Daily)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "table": "incident",
+        "options": {
+          "query": "active=true^ORDERBYDESCsys_created_on",
+          "limit": 50
+        }
+      },
+      "id": "2",
+      "name": "ServiceNow - Get Tickets",
+      "type": "n8n-nodes-base.servicenow",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "credentials": {
+        "serviceNowApi": {
+          "id": "={{$credentials.serviceNowApi.id}}",
+          "name": "ServiceNow Dev"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cron (Twice Daily)": {
+      "main": [[{"node": "ServiceNow - Get Tickets", "type": "main", "index": 0}]]
+    }
+  }
+}
