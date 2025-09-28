@@ -68,13 +68,8 @@ The workflow is split into **6 modules** for easier maintenance and testing:
 
 7. **Integration
 
-Module 1 (ServiceNow Poll) → Module 2 (CrewAI Classification)
-       ↓
-Module 3 (Routing Logic) → Module 4 (Approval Workflow)
-       ↓
-Module 5 (Provision Workspace) → Module 6 (Notifications)
 
-
+<img width="7860" height="2268" alt="17590601509086431502768677568704" src="https://github.com/user-attachments/assets/3f036ca1-be82-44d5-a11a-2df3a1822235" />
 
 ---
 
