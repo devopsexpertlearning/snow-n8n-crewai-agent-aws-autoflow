@@ -1,0 +1,289 @@
+{
+  "name": "Module 4 - Approval Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"approver_email\"]}}",
+        "subject": "Approval Required: AWS WorkSpace Request",
+        "text": "Ticket {{$json[\"number\"]}} requires your approval for WorkSpace provisioning."
+      },
+      "id": "1",
+      "name": "Initial Approval Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [400, 300],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "unit": "days",
+        "value": 1
+      },
+      "id": "2",
+      "name": "Wait 1 Day",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [600, 300]
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"approver_email\"]}}",
+        "subject": "Reminder #1: WorkSpace Approval Pending",
+        "text": "Reminder: Please approve WorkSpace request Ticket {{$json[\"number\"]}}."
+      },
+      "id": "3",
+      "name": "Reminder #1",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [800, 300],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "unit": "days",
+        "value": 1
+      },
+      "id": "4",
+      "name": "Wait 2nd Day",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1000, 300]
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"approver_email\"]}}",
+        "subject": "Reminder #2: WorkSpace Approval Pending",
+        "text": "Reminder #2: Please approve WorkSpace request Ticket {{$json[\"number\"]}}."
+      },
+      "id": "5",
+      "name": "Reminder #2",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1200, 300],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "unit": "days",
+        "value": 1
+      },
+      "id": "6",
+      "name": "Wait 3rd Day",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1400, 300]
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"approver_email\"]}}",
+        "subject": "Reminder #3: WorkSpace Approval Pending",
+        "text": "Reminder #3: Please approve WorkSpace request Ticket {{$json[\"number\"]}}."
+      },
+      "id": "7",
+      "name": "Reminder #3",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1600, 300],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "unit": "days",
+        "value": 1
+      },
+      "id": "8",
+      "name": "Wait Day 4",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [1800, 300]
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"manager_email\"]}}",
+        "subject": "Escalation #1: WorkSpace Approval Pending",
+        "text": "Escalation #1: Ticket {{$json[\"number\"]}} still requires approval."
+      },
+      "id": "9",
+      "name": "Escalation #1",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [2000, 300],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "unit": "days",
+        "value": 1
+      },
+      "id": "10",
+      "name": "Wait Day 5",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [2200, 300]
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"manager_email\"]}}",
+        "subject": "Escalation #2: WorkSpace Approval Pending",
+        "text": "Escalation #2: Ticket {{$json[\"number\"]}} still requires approval."
+      },
+      "id": "11",
+      "name": "Escalation #2",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [2400, 300],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "unit": "days",
+        "value": 1
+      },
+      "id": "12",
+      "name": "Wait Day 6",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [2600, 300]
+    },
+
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "incident",
+        "updateFields": {
+          "state": "Closed",
+          "comments": "Auto-closed after 3 reminders + 2 escalations without approval."
+        },
+        "query": "sys_id={{$json[\"sys_id\"]}}"
+      },
+      "id": "13",
+      "name": "Auto-Close Ticket in ServiceNow",
+      "type": "n8n-nodes-base.servicenow",
+      "typeVersion": 1,
+      "position": [2800, 300],
+      "credentials": {
+        "serviceNowApi": {
+          "id": "={{$credentials.serviceNowApi.id}}",
+          "name": "ServiceNow Dev"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"requester_email\"]}}",
+        "subject": "WorkSpace Request Auto-Closed",
+        "text": "Ticket {{$json[\"number\"]}} has been auto-closed after 3 reminders + 2 escalations without approval."
+      },
+      "id": "14",
+      "name": "Notify Requester of Auto-Close",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [3000, 300],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Initial Approval Email": {
+      "main": [[{"node": "Wait 1 Day", "type": "main", "index": 0}]]
+    },
+    "Wait 1 Day": {
+      "main": [[{"node": "Reminder #1", "type": "main", "index": 0}]]
+    },
+    "Reminder #1": {
+      "main": [[{"node": "Wait 2nd Day", "type": "main", "index": 0}]]
+    },
+    "Wait 2nd Day": {
+      "main": [[{"node": "Reminder #2", "type": "main", "index": 0}]]
+    },
+    "Reminder #2": {
+      "main": [[{"node": "Wait 3rd Day", "type": "main", "index": 0}]]
+    },
+    "Wait 3rd Day": {
+      "main": [[{"node": "Reminder #3", "type": "main", "index": 0}]]
+    },
+    "Reminder #3": {
+      "main": [[{"node": "Wait Day 4", "type": "main", "index": 0}]]
+    },
+    "Wait Day 4": {
+      "main": [[{"node": "Escalation #1", "type": "main", "index": 0}]]
+    },
+    "Escalation #1": {
+      "main": [[{"node": "Wait Day 5", "type": "main", "index": 0}]]
+    },
+    "Wait Day 5": {
+      "main": [[{"node": "Escalation #2", "type": "main", "index": 0}]]
+    },
+    "Escalation #2": {
+      "main": [[{"node": "Wait Day 6", "type": "main", "index": 0}]]
+    },
+    "Wait Day 6": {
+      "main": [
+        [
+          {"node": "Auto-Close Ticket in ServiceNow", "type": "main", "index": 0},
+          {"node": "Notify Requester of Auto-Close", "type": "main", "index": 1}
+        ]
+      ]
+    }
+  }
+}
