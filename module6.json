@@ -1,0 +1,116 @@
+{
+  "name": "Module 6 - Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"requester_email\"]}}",
+        "subject": "WorkSpace Request Approved",
+        "text": "Hello {{$json[\"requester\"]}},\n\nYour AWS WorkSpace request has been approved and is being provisioned. You will receive credentials once ready."
+      },
+      "id": "1",
+      "name": "Notify Requester Approved",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [400, 200],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"requester_email\"]}}",
+        "subject": "WorkSpace Request - Non-Workspace Resources",
+        "text": "Hello {{$json[\"requester\"]}},\n\nYour WorkSpace request is being processed. For EC2/RDS, please raise separate tickets."
+      },
+      "id": "2",
+      "name": "Notify Requester Other Resources",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [400, 400],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"approver_email\"]}}",
+        "subject": "Reminder: Pending WorkSpace Approval",
+        "text": "Reminder: Ticket {{$json[\"number\"]}} requires your approval."
+      },
+      "id": "3",
+      "name": "Notify Approver",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [600, 200],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"manager_email\"]}}",
+        "subject": "Escalation: WorkSpace Approval Pending",
+        "text": "Escalation: Ticket {{$json[\"number\"]}} still requires approval."
+      },
+      "id": "4",
+      "name": "Notify Manager Escalation",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [800, 200],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"requester_email\"]}}",
+        "subject": "WorkSpace Request Auto-Closed",
+        "text": "Ticket {{$json[\"number\"]}} has been auto-closed after 3 reminders + 2 escalations without approval."
+      },
+      "id": "5",
+      "name": "Notify Requester Auto-Close",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1000, 200],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Notify Requester Approved": {"main": []},
+    "Notify Requester Other Resources": {"main": []},
+    "Notify Approver": {"main": []},
+    "Notify Manager Escalation": {"main": []},
+    "Notify Requester Auto-Close": {"main": []}
+  }
+}
