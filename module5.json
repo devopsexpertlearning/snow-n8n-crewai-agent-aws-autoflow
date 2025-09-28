@@ -1,0 +1,97 @@
+{
+  "name": "Module 5 - AWS WorkSpaces Provisioning",
+  "nodes": [
+    {
+      "parameters": {
+        "service": "workspaces",
+        "operation": "createWorkspaces",
+        "region": "={{$credentials.AWS_WorkSpaces.region}}",
+        "workspaces": [
+          {
+            "DirectoryId": "d-1234567890",
+            "UserName": "={{$json[\"requester\"]}}",
+            "BundleId": "wsb-xxxxxxxx",
+            "WorkspaceProperties": {
+              "RunningMode": "AUTO_STOP",
+              "RunningModeAutoStopTimeoutInMinutes": 60,
+              "RootVolumeSizeGib": 80,
+              "UserVolumeSizeGib": 50,
+              "ComputeTypeName": "STANDARD"
+            }
+          }
+        ]
+      },
+      "id": "1",
+      "name": "Provision AWS WorkSpace",
+      "type": "n8n-nodes-aws.workspaces",
+      "typeVersion": 1,
+      "position": [800, 300],
+      "credentials": {
+        "aws": {
+          "id": "={{$credentials.AWS_WorkSpaces.id}}",
+          "name": "AWS WorkSpaces"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "authentication": "smtp",
+        "fromEmail": "={{$credentials.SMTP.user}}",
+        "toEmail": "={{$json[\"requester_email\"]}}",
+        "subject": "Your AWS WorkSpace is Ready",
+        "text": "Hello {{$json[\"requester\"]}},\n\nYour AWS WorkSpace has been provisioned successfully.\n\nUsername: {{$json[\"requester\"]}}\nDirectory: d-1234567890\n\nYou can now log in using your credentials."
+      },
+      "id": "2",
+      "name": "Notify Requester Workspace Ready",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1000, 300],
+      "credentials": {
+        "smtp": {
+          "id": "={{$credentials.SMTP.id}}",
+          "name": "SMTP AWS SES"
+        }
+      }
+    },
+
+    {
+      "parameters": {
+        "operation": "update",
+        "table": "incident",
+        "updateFields": {
+          "state": "Closed",
+          "comments": "AWS WorkSpace provisioned successfully and requester notified."
+        },
+        "query": "sys_id={{$json[\"sys_id\"]}}"
+      },
+      "id": "3",
+      "name": "Update ServiceNow Ticket",
+      "type": "n8n-nodes-base.servicenow",
+      "typeVersion": 1,
+      "position": [1200, 300],
+      "credentials": {
+        "serviceNowApi": {
+          "id": "={{$credentials.serviceNowApi.id}}",
+          "name": "ServiceNow Dev"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Provision AWS WorkSpace": {
+      "main": [
+        [
+          {"node": "Notify Requester Workspace Ready", "type": "main", "index": 0}
+        ]
+      ]
+    },
+    "Notify Requester Workspace Ready": {
+      "main": [
+        [
+          {"node": "Update ServiceNow Ticket", "type": "main", "index": 0}
+        ]
+      ]
+    }
+  }
+}
